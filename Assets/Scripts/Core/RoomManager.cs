@@ -113,7 +113,7 @@ namespace Core
         {
             int randomIndex = UnityEngine.Random.Range(0, playerPositions.Count);
             Vector3 spawnPos = playerPositions[randomIndex];
-            PhotonNetwork.Instantiate(Path.Combine("PhotonPrefabs", "FP_Player"), spawnPos, Quaternion.identity);
+            PhotonNetwork.Instantiate(Path.Combine("PhotonPrefabs", "FP_Player_Rigged"), spawnPos, Quaternion.identity);
         }
         
     }

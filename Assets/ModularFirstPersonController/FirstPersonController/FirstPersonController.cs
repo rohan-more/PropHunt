@@ -8,6 +8,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Photon.Pun;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 #if UNITY_EDITOR
@@ -20,7 +21,9 @@ public class FirstPersonController : MonoBehaviour
     public Rigidbody rb;
     public PhotonView photonView;
     public GameObject crosshairUI;
+    public GameObject gunModel;
     public AudioListener audioListener;
+    public Animator animator;
     #region Camera Movement Variables
 
     public Camera playerCamera;
@@ -145,6 +148,7 @@ public class FirstPersonController : MonoBehaviour
             playerCamera.enabled = false;
             audioListener.enabled = false;
             crosshairUI.SetActive(false);
+            gunModel.SetActive(false);
         }
 
         // Set internal variables
@@ -171,6 +175,7 @@ public class FirstPersonController : MonoBehaviour
             playerCamera.enabled = false;
             audioListener.enabled = false;
             crosshairUI.SetActive(false);
+            gunModel.SetActive(false);
         }
         
         if (photonView.IsMine)
@@ -418,7 +423,7 @@ public class FirstPersonController : MonoBehaviour
             HeadBob();
         }
     }
-
+    
     void FixedUpdate()
     {
         if (!photonView.IsMine)
@@ -443,6 +448,8 @@ public class FirstPersonController : MonoBehaviour
             {
                 isWalking = false;
             }
+            
+            animator.SetBool("IsWalking", isWalking);
 
             // All movement calculations shile sprint is active
             if (enableSprint && Input.GetKey(sprintKey) && sprintRemaining > 0f && !isSprintCooldown)
@@ -482,7 +489,7 @@ public class FirstPersonController : MonoBehaviour
 
                 if (hideBarWhenFull && sprintRemaining == sprintDuration)
                 {
-                    sprintBarCG.alpha -= 3 * Time.deltaTime;
+                    if (sprintBarCG != null) sprintBarCG.alpha -= 3 * Time.deltaTime;
                 }
 
                 targetVelocity = transform.TransformDirection(targetVelocity) * walkSpeed;
@@ -616,7 +623,9 @@ public class FirstPersonController : MonoBehaviour
         fpc.rb = (Rigidbody)EditorGUILayout.ObjectField(new GUIContent("Rigidbody", "Rigidbody attached to the controller."), fpc.rb, typeof(Rigidbody), true);
         fpc.photonView = (PhotonView)EditorGUILayout.ObjectField(new GUIContent("PhotonView", "PhotonView attached to the controller."), fpc.photonView, typeof(PhotonView), true);
         fpc.crosshairUI = (GameObject)EditorGUILayout.ObjectField(new GUIContent("Crosshair", "Crosshair UI attached to the controller."), fpc.crosshairUI, typeof(GameObject), true);
+        fpc.gunModel = (GameObject)EditorGUILayout.ObjectField(new GUIContent("Gun Model", "Gun Model attached to the controller."), fpc.gunModel, typeof(GameObject), true);
         fpc.audioListener = (AudioListener)EditorGUILayout.ObjectField(new GUIContent("Camera AudioListener", "AudioListener attached to the controller."), fpc.audioListener, typeof(AudioListener), true);
+        fpc.animator = (Animator)EditorGUILayout.ObjectField(new GUIContent("Animator", "Animator attached to the controller."), fpc.animator, typeof(Animator), true);
         #region Camera Setup
 
         EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
