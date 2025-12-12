@@ -15,7 +15,6 @@ public class HealthView : MonoBehaviour
     private int currentHealth;
     private void Start()
     {
-
         _playerName.text = PhotonNetwork.NickName;
         currentHealth = maxHealth;
         if (RoomManager.Instance.GetPlayerType(PhotonNetwork.NickName) == PlayerType.HUNTER)

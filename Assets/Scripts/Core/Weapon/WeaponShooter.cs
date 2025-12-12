@@ -10,7 +10,7 @@ public class WeaponShooter : MonoBehaviour
     [SerializeField] private float rayMaxDistance;
     [SerializeField] private Camera fpsCam;
     [SerializeField] private PhotonView _photonView;
-
+    [SerializeField] private Animator _animator;
     private PhotonView targetView;
     private string targetName;
     private HiderBodyController controller;
@@ -19,6 +19,8 @@ public class WeaponShooter : MonoBehaviour
 
         if (Physics.Raycast(fpsCam.transform.position, fpsCam.transform.forward, out RaycastHit hit, rayMaxDistance))
         {
+            
+            _animator.SetBool("IsShooting", true);
             if (hit.transform.CompareTag("TP_Player"))
             {
                 targetView = hit.transform.GetComponent<PhotonView>();
@@ -45,9 +47,13 @@ public class WeaponShooter : MonoBehaviour
     
     void Update()
     {
-        if (Input.GetButtonDown("Fire1"))
+        if (Input.GetButton("Fire1"))
         {
             ShootRay();
+        }
+        if (Input.GetButtonUp("Fire1"))
+        {
+            _animator.SetBool("IsShooting", false);
         }
     }
 }

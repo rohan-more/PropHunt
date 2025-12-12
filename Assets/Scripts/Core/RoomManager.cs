@@ -1,19 +1,20 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Photon.Pun;
 using UnityEngine.SceneManagement;
-using System.IO;
-using System.Linq;
 using Photon.Realtime;
 using Random = UnityEngine.Random;
 
 namespace Core
 {
-    
-    public enum PlayerType {PROP, HUNTER}
-    
+    public enum PlayerType
+    {
+        PROP,
+        HUNTER
+    }
+
     public class RoomManager : MonoBehaviourPunCallbacks
     {
         public static RoomManager Instance;
@@ -22,29 +23,37 @@ namespace Core
         private GameObject spawnPositions;
         public PlayerType _playerType;
         public bool _forcePlayerType;
+
         private List<Vector3> playerPositions = new List<Vector3>();
+        private bool hasSpawned = false; // prevent duplicate spawns
+        private bool sceneReady = false;
+        private bool joinedRoom = false;
+
         void Awake()
         {
-            if(Instance)
+            if (Instance)
             {
                 Destroy(gameObject);
                 return;
             }
+
             DontDestroyOnLoad(gameObject);
             Instance = this;
 
             PlayerList = new Dictionary<MyPlayer, PlayerType>();
+            Debug.Log("[RoomManager] Awake - Instance created");
         }
 
         public PlayerType GetPlayerType(string playerName)
         {
-            return PlayerList.Keys.Where(player => player.NickName == playerName).Select(player => player.Type).FirstOrDefault();
+            // defensive: find by NickName reliably
+            var entry = PlayerList.Keys.FirstOrDefault(player => player != null && player.NickName == playerName);
+            return entry != null ? entry.Type : PlayerType.PROP;
         }
 
         public override void OnEnable()
         {
             base.OnEnable();
-            
             SceneManager.sceneLoaded += OnSceneLoaded;
         }
 
@@ -56,65 +65,172 @@ namespace Core
 
         void OnSceneLoaded(Scene scene, LoadSceneMode loadSceneMode)
         {
-            if(scene.buildIndex == 2) // We're in the game scene
+            if (scene.buildIndex != 2) return;
+
+            Debug.Log("[RoomManager] OnSceneLoaded - game scene loaded");
+            sceneReady = true;
+            playerPositions.Clear();
+            GetSpawnPositions();
+
+            // master spawns ScoreManager as before
+            if (PhotonNetwork.IsMasterClient)
             {
-                if(PhotonNetwork.IsMasterClient)
-                {
-                    PhotonNetwork.Instantiate(Path.Combine("PhotonPrefabs", "ScoreManager"), Vector3.one,
-                        Quaternion.identity);
-                }
-                GetSpawnPositions();
-                CreateController();
+                Debug.Log("[RoomManager] MasterClient creating ScoreManager");
+                SpawnNetworkPrefab("PhotonPrefabs/ScoreManager", Vector3.one, Quaternion.identity);
             }
+
+            TrySpawnLocalControllerIfReady();
+        }
+
+        public override void OnJoinedRoom()
+        {
+            base.OnJoinedRoom();
+            Debug.Log("[RoomManager] OnJoinedRoom callback received");
+            joinedRoom = true;
+            TrySpawnLocalControllerIfReady();
+        }
+
+// central spawn gate
+        private void TrySpawnLocalControllerIfReady()
+        {
+            if (!sceneReady)
+            {
+                Debug.Log("[RoomManager] TrySpawnLocalControllerIfReady: scene not ready yet");
+                return;
+            }
+
+            if (!joinedRoom)
+            {
+                Debug.Log("[RoomManager] TrySpawnLocalControllerIfReady: not joined room yet");
+                return;
+            }
+
+            if (hasSpawned)
+            {
+                Debug.Log("[RoomManager] TrySpawnLocalControllerIfReady: already spawned");
+                return;
+            }
+
+            Debug.Log("[RoomManager] Conditions met -> spawning local controller");
+            CreateController();
         }
 
         private void GetSpawnPositions()
         {
             spawnPositions = GameObject.Find("PlayerSpawnPoints");
+            if (spawnPositions == null)
+            {
+                Debug.LogError("[RoomManager] GetSpawnPositions: 'PlayerSpawnPoints' GameObject not found in scene.");
+                return;
+            }
+
+            playerPositions.Clear();
             foreach (Transform child in spawnPositions.transform)
             {
-                playerPositions.Add(child.transform.position);
+                playerPositions.Add(child.position);
             }
-            
+
+            Debug.Log($"[RoomManager] GetSpawnPositions: found {playerPositions.Count} spawn positions.");
         }
-        
+
         void CreateController()
         {
-            List<Player> players = PhotonNetwork.PlayerList.ToList();
-            Dictionary<MyPlayer, PlayerType>.KeyCollection playerKeys = RoomManager.Instance.PlayerList.Keys;
+            if (hasSpawned)
+                return;
 
-            foreach (var item in playerKeys)
+            // get local Photon player
+            Player photonLocal = PhotonNetwork.LocalPlayer;
+
+            // find this player's type in your custom list
+            PlayerType localType = PlayerType.PROP; // default fallback
+
+            foreach (var entry in PlayerList)
             {
-                RoomManager.Instance.PlayerList.TryGetValue(item, out PlayerType type);
-                if (item.IsLocal)
+                if (entry.Key.NickName == photonLocal.NickName)
                 {
-                    if (item.Type != PlayerType.PROP)
-                    {
-                        CreateSeekers();
-                    }
-                    else
-                    {
-                        CreateHider();
-                    }
+                    localType = entry.Value;
+                    break;
                 }
             }
-            Cursor.lockState = CursorLockMode.Locked;
+
+            Debug.Log($"[RoomManager] Spawning local player. Type = {localType}");
+
+            if (localType == PlayerType.PROP)
+                SpawnHider();
+            else
+                SpawnSeeker();
+
+            hasSpawned = true;
         }
 
-        void CreateHider()
+
+        void SpawnHider()
         {
-            int randomIndex = UnityEngine.Random.Range(0, playerPositions.Count);
+            if (playerPositions.Count == 0)
+            {
+                Debug.LogError("[RoomManager] SpawnHider: no spawn positions available.");
+                return;
+            }
+
+            int randomIndex = Random.Range(0, playerPositions.Count);
             Vector3 spawnPos = playerPositions[randomIndex];
-            PhotonNetwork.Instantiate(Path.Combine("PhotonPrefabs", "TP_Player"), spawnPos, Quaternion.identity);
-            PhotonNetwork.Instantiate(Path.Combine("PhotonPrefabs", "TP_Camera"), spawnPos, Quaternion.identity);
+            // remove chosen spawn so others don't reuse same spot locally
+            playerPositions.RemoveAt(randomIndex);
+
+            Debug.Log($"[RoomManager] SpawnHider: Instantiating TP_Player and TP_Camera at {spawnPos}");
+            SpawnNetworkPrefab("PhotonPrefabs/TP_Player", spawnPos, Quaternion.identity);
+            SpawnNetworkPrefab("PhotonPrefabs/TP_Camera", spawnPos, Quaternion.identity);
         }
 
-        void CreateSeekers()
+        void SpawnSeeker()
         {
-            int randomIndex = UnityEngine.Random.Range(0, playerPositions.Count);
+            if (playerPositions.Count == 0)
+            {
+                Debug.LogError("[RoomManager] SpawnSeeker: no spawn positions available.");
+                return;
+            }
+
+            int randomIndex = Random.Range(0, playerPositions.Count);
             Vector3 spawnPos = playerPositions[randomIndex];
-            PhotonNetwork.Instantiate(Path.Combine("PhotonPrefabs", "FP_Player"), spawnPos, Quaternion.identity);
+            playerPositions.RemoveAt(randomIndex);
+
+            Debug.Log($"[RoomManager] SpawnSeeker: Instantiating FP_Player_Rigged at {spawnPos}");
+            SpawnNetworkPrefab("PhotonPrefabs/FP_Player_Rigged", spawnPos, Quaternion.identity);
         }
-        
+
+
+        GameObject SpawnNetworkPrefab(string resourcePath, Vector3 pos, Quaternion rot)
+        {
+            Debug.Log($"[Spawn] Attempt PhotonNetwork.Instantiate('{resourcePath}') at {pos}");
+            if (!PhotonNetwork.IsConnected || !PhotonNetwork.InRoom)
+            {
+                Debug.LogError("[Spawn] Photon not connected or not in room. Aborting instantiate.");
+                return null;
+            }
+
+            GameObject go = null;
+            try
+            {
+                go = PhotonNetwork.Instantiate(resourcePath, pos, rot);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[Spawn] PhotonNetwork.Instantiate threw: {ex}");
+            }
+
+            if (go == null)
+            {
+                Debug.LogError(
+                    $"[Spawn] PhotonNetwork.Instantiate returned null for '{resourcePath}'. Check Resources folder and path.");
+            }
+            else
+            {
+                var pv = go.GetComponent<PhotonView>();
+                Debug.Log(
+                    $"[Spawn] Instantiated '{go.name}' ViewID={(pv != null ? pv.ViewID.ToString() : "no PV")} IsMine={(pv != null ? pv.IsMine.ToString() : "n/a")} Owner={(pv?.Owner?.NickName ?? "n/a")}");
+            }
+
+            return go;
+        }
     }
 }

@@ -17,6 +17,8 @@ namespace Core
         private string meshID;
         public KeyCode cloneInput = KeyCode.LeftControl;
 
+        [SerializeField] private bool useMeshCollider = true; // set in inspector: prefer MeshCollider, fallback to box
+        [SerializeField] private bool colliderIsTrigger = false; // whether collider should be a trigger
         private void Start()
         {
             if (_photonView.IsMine)
@@ -55,6 +57,7 @@ namespace Core
             }
             _playerMesh.mesh = MeshManager.Instance.GetMeshByName(meshName);
             _playerMeshRenderer.material = MeshManager.Instance.GetMaterialByName(meshName);
+            UpdateCollider();
         }
         
         [PunRPC]
@@ -77,8 +80,10 @@ namespace Core
             }
             _playerMesh.mesh = MeshManager.Instance.GetMeshByName(meshName);
             _playerMeshRenderer.material = MeshManager.Instance.GetMaterialByName(meshName);
+            UpdateCollider();
             _photonView.RPC("RPC_PropChangeModel", RpcTarget.OthersBuffered, viewID, meshName);
             meshID = meshName;
+
         }
         
         private void SwapMesh(int viewID, MeshName meshName)
@@ -89,6 +94,7 @@ namespace Core
             }
             _playerMesh.mesh = MeshManager.Instance.GetMesh(meshName);
             _playerMeshRenderer.material = MeshManager.Instance.GetMaterial(meshName);
+            UpdateCollider();
             _photonView.RPC("RPC_PropChangeModel", RpcTarget.OthersBuffered, viewID, meshName.ToString().ToLower());
             meshID = meshName.ToString();
         }
@@ -96,6 +102,31 @@ namespace Core
         public void SendDamage(string playerName)
         {
             _photonView.RPC("RPC_RecieveDamage", RpcTarget.Others, playerName, 1);
+        }
+        
+        private void UpdateCollider()
+        {
+            if (_playerMesh == null || _playerMesh.mesh == null)
+                return;
+            
+            Mesh mesh = _playerMesh.mesh;
+
+            if (useMeshCollider)
+            {
+                // attempt mesh collider
+                MeshCollider meshCol = gameObject.AddComponent<MeshCollider>();
+                meshCol.sharedMesh = mesh;
+                meshCol.convex = true; // required for many dynamic physics/trigger cases
+                meshCol.isTrigger = colliderIsTrigger;
+                return;
+            }
+
+            // fallback: box collider that matches mesh bounds
+            BoxCollider box = gameObject.AddComponent<BoxCollider>();
+            // mesh.bounds are in mesh local-space; scale is handled by transform.localScale
+            box.center = mesh.bounds.center;
+            box.size = mesh.bounds.size;
+            box.isTrigger = colliderIsTrigger;
         }
 
         public void Update()
