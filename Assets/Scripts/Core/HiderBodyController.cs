@@ -97,7 +97,6 @@ namespace Core
             UpdateCollider();
             _photonView.RPC("RPC_PropChangeModel", RpcTarget.OthersBuffered, viewID, meshName.ToString().ToLower());
             meshID = meshName.ToString();
-            UpdateCollider();
         }
 
         public void SendDamage(string playerName)

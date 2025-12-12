@@ -59,6 +59,20 @@ public class vThirdPersonCamera : MonoBehaviour
 
     #endregion
 
+    
+    private void Awake()
+    {
+        if (_photonView == null)
+        {
+            _photonView = GetComponent<PhotonView>();
+            Debug.Log($"[{nameof(vThirdPersonCamera)}] Awake: photonView auto-assigned -> {(_photonView!=null)}");
+        }
+        if (_photonView != null)
+        {
+            Debug.Log($"[{nameof(vThirdPersonCamera)}] Awake: ViewID={_photonView.ViewID} IsMine={_photonView.IsMine} Owner={(_photonView.Owner!=null ? _photonView.Owner.ActorNumber.ToString() : "null")}");
+        }
+    }
+    
     void Start()
     {
         Init();

@@ -18,6 +18,19 @@ public class HiderCamera : MonoBehaviour
     public float hideValue = 0f;
     public float showValue = 0.005f;
     private List<Renderer> renderers = new();
+    private HashSet<Renderer> highlightRenderers = new HashSet<Renderer>();
+    private void Awake()
+    {
+        if (photonView == null)
+        {
+            photonView = GetComponent<PhotonView>();
+            Debug.Log($"[{nameof(HiderCamera)}] Awake: photonView auto-assigned -> {(photonView!=null)}");
+        }
+        if (photonView != null)
+        {
+            Debug.Log($"[{nameof(HiderCamera)}] Awake: ViewID={photonView.ViewID} IsMine={photonView.IsMine} Owner={(photonView.Owner!=null ? photonView.Owner.ActorNumber.ToString() : "null")}");
+        }
+    }
     private void Start()
     {
         meshMap = new Dictionary<Func<string, bool>, MeshName>
@@ -33,49 +46,42 @@ public class HiderCamera : MonoBehaviour
 
     void Update()
     {
-        if (!photonView.IsMine)
-        {
-            return;
-        }
+        if (photonView == null) photonView = GetComponent<PhotonView>();
+        if (!photonView.IsMine) return;
 
         Ray ray = _camera.ScreenPointToRay(Input.mousePosition);
-        RaycastHit hit;
-
-        if (Physics.Raycast(ray, out hit, Mathf.Infinity))
+        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity))
         {
             if (hit.collider.CompareTag("Hideable"))
             {
                 Renderer renderer = hit.collider.GetComponent<Renderer>();
-                renderers.Add(renderer);
-
-                foreach (var item in renderers)
+                if (renderer != null && highlightRenderers.Add(renderer))
                 {
-                    ToggleShaderProperty(item, showValue);
+                    ToggleShaderProperty(renderer, showValue);
                 }
             }
-            else
+            else if (highlightRenderers.Count > 0)
             {
-                foreach (var item in renderers)
-                {
-                    ToggleShaderProperty(item, hideValue);
-                }
-                renderers.Clear();
+                foreach (var item in highlightRenderers) ToggleShaderProperty(item, hideValue);
+                highlightRenderers.Clear();
             }
         }
-
-        if (Input.GetMouseButtonDown(0))
+        else if (highlightRenderers.Count > 0)
         {
-            DetectObject();
+            foreach (var item in highlightRenderers) ToggleShaderProperty(item, hideValue);
+            highlightRenderers.Clear();
         }
-    }
 
+        if (Input.GetMouseButtonDown(0)) DetectObject();
+    }
     public void SetTargetPlayer()
     {
-        if (_targetPlayer == null)
-        {
-            _targetPlayer = _tpCamera.target;
-            _targetViewID = _targetPlayer.gameObject.GetPhotonView().ViewID;
-        }
+        if (_tpCamera == null) return;
+        if (_tpCamera.target == null) return;
+        _targetPlayer = _tpCamera.target;
+        PhotonView pv = _targetPlayer.gameObject.GetComponent<PhotonView>();
+        _targetViewID = pv != null ? pv.ViewID : -1;
+        Debug.Log($"[HiderCamera] SetTargetPlayer target={_targetPlayer.name} viewid={_targetViewID}");
     }
     
     void ToggleShaderProperty(Renderer renderer, float value)

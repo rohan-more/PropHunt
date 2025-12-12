@@ -47,5 +47,5 @@ MonoBehaviour:
   - RPC_RecieveDamage
   - RPC_SetPlayer
   DisableAutoOpenWizard: 1
-  ShowSettings: 0
+  ShowSettings: 1
   DevRegionSetOnce: 1
