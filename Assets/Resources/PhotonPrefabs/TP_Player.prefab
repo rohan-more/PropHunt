@@ -1811,7 +1811,7 @@ GameObject:
   - component: {fileID: 893746271971746746}
   - component: {fileID: 2926770515884760992}
   - component: {fileID: 6911544808522181899}
-  - component: {fileID: 3059784554062303137}
+  - component: {fileID: 8248124327061379403}
   m_Layer: 0
   m_Name: TP_Player
   m_TagString: TP_Player
@@ -2037,7 +2037,7 @@ MonoBehaviour:
   m_SynchronizeRotation: 1
   m_SynchronizeScale: 0
   m_UseLocal: 1
---- !u!114 &3059784554062303137
+--- !u!114 &8248124327061379403
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -2046,16 +2046,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 893746271971746745}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0445c32d96f122540a3de80ac9b44a61, type: 3}
+  m_Script: {fileID: 11500000, guid: 10573634f84ca2947a68c7e0fc4d3f8b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _playerMesh: {fileID: 8188752255417805013}
-  _playerMeshRenderer: {fileID: 6505326015619765187}
-  _photonView: {fileID: 2926770515884760992}
-  _healthView: {fileID: 0}
-  cloneInput: 306
+  playerMesh: {fileID: 8188752255417805013}
+  playerMeshRenderer: {fileID: 6505326015619765187}
   useMeshCollider: 1
   colliderIsTrigger: 0
+  cloneInput: 306
 --- !u!1 &893746271978074648
 GameObject:
   m_ObjectHideFlags: 0

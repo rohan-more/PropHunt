@@ -7,6 +7,13 @@ public class PropHUDView : MonoBehaviour
     [SerializeField] private Slider healthSlider;
     [SerializeField] private TMP_Text timerText;
     [SerializeField] private TMP_Text survivalScoreText;
+    [SerializeField] private TMP_Text playerName;
+    
+    
+    public void SetPlayerName(string name)
+    {
+        playerName.text = name;
+    }
 
     public void InitializeHealth(int maxHealth)
     {

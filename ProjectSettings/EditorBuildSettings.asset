@@ -9,10 +9,10 @@ EditorBuildSettings:
     path: Assets/Scenes/MainMenu.unity
     guid: 91874bd942e07094b8a2cacdd3b32510
   - enabled: 1
-    path: Assets/Scenes/GameScene.unity
+    path: Assets/Scenes/PrototypeScene.unity
     guid: a28cab69efc0a974a9eb7850c2b26922
   - enabled: 1
-    path: Assets/Scenes/NewGameScene.unity
+    path: Assets/Scenes/VillageMap.unity
     guid: 8ffc9a7209df5244fb240b8531be7584
   m_configObjects:
     com.unity.adaptiveperformance.simulator.provider_settings: {fileID: 11400000,

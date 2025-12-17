@@ -5,6 +5,13 @@ public class HunterHUDView : MonoBehaviour
 {
     [SerializeField] private TMP_Text timerText;
     [SerializeField] private TMP_Text killCountText;
+    [SerializeField] private TMP_Text playerName;
+    
+    
+    public void SetPlayerName(string name)
+    {
+        playerName.text = name;
+    }
 
     public void SetTimer(double remainingSeconds)
     {

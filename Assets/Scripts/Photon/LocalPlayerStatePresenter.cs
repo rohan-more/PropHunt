@@ -1,3 +1,4 @@
+using Core;
 using Photon.Pun;
 using Photon.Realtime;
 using ExitGames.Client.Photon;
@@ -5,38 +6,61 @@ using UnityEngine;
 
 public class LocalPlayerStatePresenter : MonoBehaviourPunCallbacks
 {
-    [SerializeField] private HealthView healthView;
-    [SerializeField] private WeaponShooter weaponShooter;
+    [SerializeField] private WeaponController weaponController;
     [SerializeField] private FirstPersonController controller;
+
+    private PlayerType localPlayerType;
+
+    private void Start()
+    {
+        if (PhotonNetwork.LocalPlayer.CustomProperties.TryGetValue("PlayerType", out object typeObj))
+        {
+            localPlayerType = (PlayerType)typeObj;
+            HandlePlayerType(localPlayerType);
+        }
+    }
 
     public override void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
     {
-        if (!targetPlayer.IsLocal) return;
+        if (!targetPlayer.IsLocal)
+            return;
 
         if (changedProps.ContainsKey("Health"))
         {
             int health = (int)changedProps["Health"];
-            healthView.SetHealth(health);
 
-            /*if (health <= 0)
-                HandleDeath();*/
+            if (health <= 0)
+                HandleDeath();
         }
 
-        if (changedProps.ContainsKey("Role"))
+        if (changedProps.ContainsKey("PlayerType"))
         {
-            HandleRole((string)changedProps["Role"]);
+            localPlayerType = (PlayerType)changedProps["PlayerType"];
+            HandlePlayerType(localPlayerType);
         }
     }
 
     private void HandleDeath()
     {
         controller.enabled = false;
-        weaponShooter.enabled = false;
-        // future: switch to spectator
+        weaponController.enabled = false;
+
+        // later:
+        // switch to spectator
+        // disable collisions
     }
 
-    private void HandleRole(string role)
+    private void HandlePlayerType(PlayerType type)
     {
-        // future-proof
+        if (type == PlayerType.HUNTER)
+        {
+            // Hunters are always armed
+            weaponController.enabled = true;
+        }
+        else
+        {
+            // Props may have limited or no weapons
+            weaponController.enabled = false;
+        }
     }
 }
