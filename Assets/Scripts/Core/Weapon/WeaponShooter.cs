@@ -12,8 +12,6 @@ public class WeaponShooter : MonoBehaviour
     [SerializeField] private PhotonView _photonView;
     [SerializeField] private Animator _animator;
     private PhotonView targetView;
-    private string targetName;
-    private HiderBodyController controller;
     private void ShootRay()
     {
 
@@ -26,10 +24,6 @@ public class WeaponShooter : MonoBehaviour
                 targetView = hit.transform.GetComponent<PhotonView>();
                 if(targetView != null)
                 {
-                    targetName = targetView.Controller.NickName;
-                    //Debug.Log("Hit " + playerName);
-                    HiderBodyController controller = hit.transform.GetComponent<HiderBodyController>();
-                    controller.SendDamage(targetName);
                     ScoreManager.Instance.AddScore(1, true, 5);
                 }
             }

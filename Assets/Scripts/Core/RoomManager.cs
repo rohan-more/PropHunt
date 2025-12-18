@@ -19,10 +19,7 @@ namespace Core
     {
         public static RoomManager Instance;
         public PhotonView _photonView;
-        public Dictionary<MyPlayer, PlayerType> PlayerList;
         private GameObject spawnPositions;
-        public PlayerType _playerType;
-        public bool _forcePlayerType;
 
         private List<Vector3> playerPositions = new List<Vector3>();
         private bool hasSpawned = false; // prevent duplicate spawns
@@ -39,18 +36,10 @@ namespace Core
 
             DontDestroyOnLoad(gameObject);
             Instance = this;
-
-            PlayerList = new Dictionary<MyPlayer, PlayerType>();
+            
             Debug.Log("[RoomManager] Awake - Instance created");
         }
-
-        public PlayerType GetPlayerType(string playerName)
-        {
-            // defensive: find by NickName reliably
-            var entry = PlayerList.Keys.FirstOrDefault(player => player != null && player.NickName == playerName);
-            return entry != null ? entry.Type : PlayerType.PROP;
-        }
-
+        
         public override void OnEnable()
         {
             base.OnEnable();
@@ -143,22 +132,23 @@ namespace Core
 
             // find this player's type in your custom list
             PlayerType localType = PlayerType.PROP; // default fallback
-
-            foreach (var entry in PlayerList)
+            
+            if (photonLocal.CustomProperties.TryGetValue(PlayerPropertyKeys.PlayerType, out object typeObj))
             {
-                if (entry.Key.NickName == photonLocal.NickName)
-                {
-                    localType = entry.Value;
-                    break;
-                }
+                localType = (PlayerType)typeObj;
             }
+
 
             Debug.Log($"[RoomManager] Spawning local player. Type = {localType}");
 
             if (localType == PlayerType.PROP)
+            {
                 SpawnHider();
+            }
             else
+            {
                 SpawnSeeker();
+            }
 
             hasSpawned = true;
         }

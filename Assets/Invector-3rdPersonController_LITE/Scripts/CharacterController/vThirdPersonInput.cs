@@ -35,7 +35,7 @@ namespace Invector.vCharacterController
 
         protected virtual void FixedUpdate()
         {
-            if (!_photonView.IsMine)
+            if (_photonView != null && !_photonView.IsMine)
             {
                 return;
             }
@@ -46,7 +46,7 @@ namespace Invector.vCharacterController
 
         protected virtual void Update()
         {
-            if (!_photonView.IsMine)
+            if (_photonView != null && !_photonView.IsMine)
             {
                 return;
             }
@@ -56,7 +56,7 @@ namespace Invector.vCharacterController
 
         public virtual void OnAnimatorMove()
         {
-            if (!_photonView.IsMine)
+            if (_photonView != null && !_photonView.IsMine)
             {
                 return;
             }
@@ -67,7 +67,7 @@ namespace Invector.vCharacterController
 
         protected virtual void InitilizeController()
         {
-            if (!_photonView.IsMine)
+            if (_photonView != null && !_photonView.IsMine)
             {
                 return;
             }
@@ -82,7 +82,7 @@ namespace Invector.vCharacterController
             if (tpCamera == null)
             {
                 tpCamera = FindObjectOfType<vThirdPersonCamera>();
-                if (!_photonView.IsMine)
+                if (_photonView != null && !_photonView.IsMine)
                 {
                     tpCamera.gameObject.SetActive(false);
                 }
@@ -103,7 +103,7 @@ namespace Invector.vCharacterController
 
         protected virtual void InputHandle()
         {
-            if (!_photonView.IsMine)
+            if (_photonView != null && !_photonView.IsMine)
             {
                 return;
             }

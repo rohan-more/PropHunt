@@ -83,7 +83,7 @@ public class vThirdPersonCamera : MonoBehaviour
         if (target == null)
             return;
         
-        if (!_photonView.IsMine)
+        if (_photonView != null && !_photonView.IsMine)
         {
             this.gameObject.SetActive(false);
             return;

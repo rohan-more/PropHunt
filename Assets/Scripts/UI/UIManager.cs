@@ -75,20 +75,51 @@ namespace Core.UI
             if (_roleSlider.value == 0)
             {
                 _roleType = PlayerType.HUNTER;
-                Color currentColor = _propImage.color;
-                _propImage.color = new Color(currentColor.r, currentColor.g, currentColor.b, 0.35f);
-                Color selectedColor = _hunterImage.color;
-                _hunterImage.color = new Color(selectedColor.r, selectedColor.g, selectedColor.b, 1f);
+                SetRoleVisuals(true);
             }
             else
             {
                 _roleType = PlayerType.PROP;
-                Color currentColor = _hunterImage.color;
-                _hunterImage.color = new Color(currentColor.r, currentColor.g, currentColor.b, 0.35f);
-                Color selectedColor = _propImage.color;
-                _propImage.color = new Color(selectedColor.r, selectedColor.g, selectedColor.b, 1f);
+                SetRoleVisuals(false);
             }
-            SetPlayerRole();
+
+            Debug.Log("[UI] Selected role: " + _roleType);
+            SetLocalPlayerRole();
+        }
+        
+        private void SetRoleVisuals(bool isHunter)
+        {
+            Color hunterColor = _hunterImage.color;
+            Color propColor = _propImage.color;
+
+            _hunterImage.color = new Color(
+                hunterColor.r, hunterColor.g, hunterColor.b,
+                isHunter ? 1f : 0.35f
+            );
+
+            _propImage.color = new Color(
+                propColor.r, propColor.g, propColor.b,
+                isHunter ? 0.35f : 1f
+            );
+        }
+        
+        private void SetLocalPlayerRole()
+        {
+            if (!PhotonNetwork.InRoom)
+            {
+                Debug.LogWarning("[UI] Not in room yet. Role not set.");
+                return;
+            }
+
+            ExitGames.Client.Photon.Hashtable props =
+                new ExitGames.Client.Photon.Hashtable
+                {
+                    { PlayerPropertyKeys.PlayerType, _roleType }
+                };
+
+            PhotonNetwork.LocalPlayer.SetCustomProperties(props);
+
+            Debug.Log("[UI] PlayerType written to Photon: " + _roleType);
         }
 
         public void OnEnable()
@@ -155,19 +186,6 @@ namespace Core.UI
                 Player newPlayer = players[i];
                 Debug.Log(newPlayer.NickName + " joined " + PhotonNetwork.CurrentRoom.Name + " Player ID: " + newPlayer.UserId);
                 MyPlayer player = new MyPlayer(newPlayer.NickName, newPlayer.ActorNumber, newPlayer.IsLocal);
-                player.Type = PlayerType.HUNTER;
-                RoomManager.Instance.PlayerList.Add(player, player.Type);
-            }
-        }
-
-        private void SetPlayerRole()
-        {
-            foreach (var item in RoomManager.Instance.PlayerList)
-            {
-                if (item.Key.IsLocal)
-                {
-                    item.Key.Type = _roleType;
-                }
             }
         }
         
@@ -208,8 +226,6 @@ namespace Core.UI
             Debug.Log(newPlayer.NickName + " has entered room " + PhotonNetwork.CurrentRoom + " Player ID: " + newPlayer.UserId);
             
             MyPlayer player = new MyPlayer(newPlayer.NickName, newPlayer.ActorNumber, newPlayer.IsLocal);
-            player.Type = PlayerType.HUNTER;
-            RoomManager.Instance.PlayerList.Add(player, player.Type);
         }
         
         private void OnJoinRoom(RoomInfo info)
