@@ -67,11 +67,11 @@ public class HitscanWeapon : Weapon
         Player target = PhotonNetwork.CurrentRoom.GetPlayer(targetActor);
         if (target == null) return;
 
-        int currentHealth = (int)target.CustomProperties["Health"];
+        int currentHealth = (int)target.CustomProperties[PlayerPropertyKeys.Health];
         int newHealth = Mathf.Max(0, currentHealth - dmg);
 
         ExitGames.Client.Photon.Hashtable props = new();
-        props["Health"] = newHealth;
+        props[PlayerPropertyKeys.Health] = newHealth;
         target.SetCustomProperties(props);
     }
 }

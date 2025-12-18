@@ -55,12 +55,12 @@ public class LocalPlayerStatePresenter : MonoBehaviourPunCallbacks
         if (type == PlayerType.HUNTER)
         {
             // Hunters are always armed
-            weaponController.enabled = true;
+            if (weaponController != null) weaponController.enabled = true;
         }
         else
         {
             // Props may have limited or no weapons
-            weaponController.enabled = false;
+            if (weaponController != null) weaponController.enabled = false;
         }
     }
 }

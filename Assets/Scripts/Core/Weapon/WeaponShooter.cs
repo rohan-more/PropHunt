@@ -12,8 +12,6 @@ public class WeaponShooter : MonoBehaviour
     [SerializeField] private PhotonView _photonView;
     [SerializeField] private Animator _animator;
     private PhotonView targetView;
-    private string targetName;
-    private PropVisualController controller;
     private void ShootRay()
     {
 
@@ -26,7 +24,6 @@ public class WeaponShooter : MonoBehaviour
                 targetView = hit.transform.GetComponent<PhotonView>();
                 if(targetView != null)
                 {
-                    targetName = targetView.Controller.NickName;
                     ScoreManager.Instance.AddScore(1, true, 5);
                 }
             }

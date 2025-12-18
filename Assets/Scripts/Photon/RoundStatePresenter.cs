@@ -16,6 +16,13 @@ public static class RoundKeys
     public const string State     = "RoundState";
 }
 
+public static class PlayerPropertyKeys
+{
+    public const string PlayerType = "PlayerType";
+    public const string Health = "Health";
+    public const string SurvivalScore = "SurvivalScore";
+}
+
 public class RoundStatePresenter : MonoBehaviourPunCallbacks
 {
     public override void OnRoomPropertiesUpdate(Hashtable changedProps)

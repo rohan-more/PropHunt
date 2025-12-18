@@ -5,7 +5,8 @@ namespace Invector.vCharacterController
     public class vThirdPersonMotor : MonoBehaviour
     {
         #region Inspector Variables
-
+        [Header("Crosshair")]
+        public bool lockCursor = true;
         [Header("- Movement")]
 
         [Tooltip("Turn off if you have 'in place' animations and use this values above to move the character, or use with root motion as extra speed")]
@@ -22,6 +23,8 @@ namespace Invector.vCharacterController
             OnlyStrafe,
             OnlyFree,
         }
+        
+
         public LocomotionType locomotionType = LocomotionType.FreeWithStrafe;
 
         public vMovementSpeed freeSpeed, strafeSpeed;
@@ -143,6 +146,11 @@ namespace Invector.vCharacterController
             colliderHeight = GetComponent<CapsuleCollider>().height;
 
             isGrounded = true;
+            
+            if (lockCursor)
+            {
+                Cursor.lockState = CursorLockMode.Locked;
+            }
         }
 
         public virtual void UpdateMotor()
