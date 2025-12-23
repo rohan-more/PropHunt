@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: -339379678657711542}
   - component: {fileID: 6603143322361709837}
   - component: {fileID: -6141750682082060773}
+  - component: {fileID: 345212245418873952}
   m_Layer: 0
   m_Name: Networked_BIRD_HOUSE
   m_TagString: Prop_Clone
@@ -140,10 +141,22 @@ MeshCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 5
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 4300000, guid: 8edf1a08abb5cb342a2a608b289c1f91, type: 3}
+--- !u!114 &345212245418873952
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1668681844432972}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 974859c195e9b1a42a7e0631ce8cef04, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

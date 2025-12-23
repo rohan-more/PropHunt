@@ -638,6 +638,7 @@ GameObject:
   - component: {fileID: 932730217598403239}
   - component: {fileID: 1254451090373224872}
   - component: {fileID: 4110971478067044819}
+  - component: {fileID: 4635834738186454917}
   m_Layer: 0
   m_Name: FirstPersonController
   m_TagString: FP_Player
@@ -799,6 +800,18 @@ MonoBehaviour:
   m_SynchronizeRotation: 1
   m_SynchronizeScale: 0
   m_UseLocal: 1
+--- !u!114 &4635834738186454917
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 932730217598403245}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe804b54811f9b94fbbb66dd8a0cd299, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1074443519031573378
 GameObject:
   m_ObjectHideFlags: 0
@@ -1141,6 +1154,7 @@ MonoBehaviour:
   damage: 1
   range: 100
   fireRate: 5
+  playerAuthority: {fileID: 4635834738186454917}
 --- !u!1 &4825075307987816205
 GameObject:
   m_ObjectHideFlags: 0

@@ -745,9 +745,15 @@ namespace IngameDebugConsole
 				if( Input.GetKeyDown( toggleKey ) )
 				{
 					if( isLogWindowVisible )
+					{
+						Cursor.lockState = CursorLockMode.Locked;
 						HideLogWindow();
+					}
 					else
+					{
+						Cursor.lockState = CursorLockMode.None;
 						ShowLogWindow();
+					}
 				}
 			}
 #endif

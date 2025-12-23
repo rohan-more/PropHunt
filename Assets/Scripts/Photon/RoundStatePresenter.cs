@@ -23,6 +23,11 @@ public static class PlayerPropertyKeys
     public const string SurvivalScore = "SurvivalScore";
 }
 
+public static class PlayerDefaults
+{
+    public const int MaxHealth = 10;
+}
+
 public class RoundStatePresenter : MonoBehaviourPunCallbacks
 {
     public override void OnRoomPropertiesUpdate(Hashtable changedProps)

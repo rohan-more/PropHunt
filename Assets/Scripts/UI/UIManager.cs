@@ -26,16 +26,19 @@ namespace Core.UI
         [SerializeField] private TMP_InputField _roomNameField;
         [SerializeField] private TMP_Text _errorText;
         [SerializeField] private TMP_Text _roomNameText;
-        
+
         [SerializeField] private PlayerItemUI _playerItemUIPrefab;
         [SerializeField] private Transform _playerListParent;
-        
+
         [SerializeField] private Transform _roomListParent;
         [SerializeField] private RoomItem _roomListItemPrefab;
         [SerializeField] private Slider _roleSlider;
         [SerializeField] private Image _hunterImage, _propImage;
         [SerializeField] private PlayerType _roleType;
-        private static readonly char[] chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789".ToCharArray();
+
+        private static readonly char[] chars =
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789".ToCharArray();
+
         private void Start()
         {
             _createLobbyBtn.onClick.AddListener(() =>
@@ -45,7 +48,7 @@ namespace Core.UI
                     _photonManager.CreateRoom(GenerateRandomString(6));
                 }
             });
-            
+
             _showCreateLobbybtn.onClick.AddListener(() =>
             {
                 _photonManager.CreateRoom(GenerateRandomString(6));
@@ -53,18 +56,24 @@ namespace Core.UI
             });
 
             _roleSlider.onValueChanged.AddListener(OnSliderValueChanged);
-            
+
             _showFindRoomsbtn.onClick.AddListener(() => { Events.OnShowTab(TabName.FIND_ROOM); });
-            
+
             _leaveRoomBtn.onClick.AddListener(LeaveRoom);
-            
+
             _startGameBtn.onClick.AddListener(() =>
             {
                 PhotonNetwork.LoadLevel(2);
             });
-            
         }
-        
+
+        public void OnPlayerChoseType(PlayerType type)
+        {
+            Debug.Log($"[RoomManager] Player chose type: {type}");
+            //RoomManager.Instance.TrySpawnLocalControllerIfReady();
+        }
+
+
         void OnSliderValueChanged(float value)
         {
             ApplySelectedRole();
@@ -86,7 +95,7 @@ namespace Core.UI
             Debug.Log("[UI] Selected role: " + _roleType);
             SetLocalPlayerRole();
         }
-        
+
         private void SetRoleVisuals(bool isHunter)
         {
             Color hunterColor = _hunterImage.color;
@@ -102,7 +111,7 @@ namespace Core.UI
                 isHunter ? 0.35f : 1f
             );
         }
-        
+
         private void SetLocalPlayerRole()
         {
             if (!PhotonNetwork.InRoom)
@@ -120,6 +129,7 @@ namespace Core.UI
             PhotonNetwork.LocalPlayer.SetCustomProperties(props);
 
             Debug.Log("[UI] PlayerType written to Photon: " + _roleType);
+            OnPlayerChoseType(_roleType);
         }
 
         public void OnEnable()
@@ -143,7 +153,7 @@ namespace Core.UI
             Events.JoinRoom -= OnJoinRoom;
             Events.MasterLeftRoom -= OnMasterLeftRoom;
         }
-        
+
         private static string GenerateRandomString(int length)
         {
             StringBuilder result = new StringBuilder(length);
@@ -154,7 +164,7 @@ namespace Core.UI
 
             return result.ToString();
         }
-        
+
         private void OnMasterLeftRoom()
         {
             _startGameBtn.gameObject.SetActive(PhotonNetwork.IsMasterClient);
@@ -164,7 +174,7 @@ namespace Core.UI
         {
             //_roomNameText.text = roomName;
         }
-        
+
         private void ShowRoomCreationFailure(string errorMsg)
         {
             _errorText.text = errorMsg;
@@ -173,32 +183,33 @@ namespace Core.UI
         private void UpdatePlayerList()
         {
             Player[] players = PhotonNetwork.PlayerList;
-        
-            foreach(Transform child in _playerListParent)
+
+            foreach (Transform child in _playerListParent)
             {
                 Destroy(child.gameObject);
             }
 
-            for(int i = 0; i < players.Count(); i++)
+            for (int i = 0; i < players.Count(); i++)
             {
                 GameObject item = Instantiate(_playerItemUIPrefab.gameObject, _playerListParent);
                 item.GetComponent<PlayerItemUI>().Initialize(players[i]);
                 Player newPlayer = players[i];
-                Debug.Log(newPlayer.NickName + " joined " + PhotonNetwork.CurrentRoom.Name + " Player ID: " + newPlayer.UserId);
+                Debug.Log(newPlayer.NickName + " joined " + PhotonNetwork.CurrentRoom.Name + " Player ID: " +
+                          newPlayer.UserId);
                 MyPlayer player = new MyPlayer(newPlayer.NickName, newPlayer.ActorNumber, newPlayer.IsLocal);
             }
         }
-        
+
         private void LeaveRoom()
         {
             Debug.Log(PhotonNetwork.NickName + " has left room " + PhotonNetwork.CurrentRoom);
             PhotonNetwork.LeaveRoom();
             Events.OnShowTab(TabName.LOADING);
         }
-        
+
         private void OnRoomListUpdate(List<RoomInfo> roomList)
         {
-            foreach(Transform trans in _roomListParent)
+            foreach (Transform trans in _roomListParent)
             {
                 Destroy(trans.gameObject);
             }
@@ -210,10 +221,11 @@ namespace Core.UI
 
             foreach (var t in roomList)
             {
-                if(t.RemovedFromList)
+                if (t.RemovedFromList)
                 {
                     continue;
                 }
+
                 GameObject item = Instantiate(_roomListItemPrefab.gameObject, _roomListParent);
                 item.GetComponent<RoomItem>().Initialize(t);
             }
@@ -223,17 +235,16 @@ namespace Core.UI
         {
             GameObject item = Instantiate(_playerItemUIPrefab.gameObject, _playerListParent);
             item.GetComponent<PlayerItemUI>().Initialize(newPlayer);
-            Debug.Log(newPlayer.NickName + " has entered room " + PhotonNetwork.CurrentRoom + " Player ID: " + newPlayer.UserId);
-            
+            Debug.Log(newPlayer.NickName + " has entered room " + PhotonNetwork.CurrentRoom + " Player ID: " +
+                      newPlayer.UserId);
+            _startGameBtn.gameObject.SetActive(PhotonNetwork.IsMasterClient);
             MyPlayer player = new MyPlayer(newPlayer.NickName, newPlayer.ActorNumber, newPlayer.IsLocal);
         }
-        
+
         private void OnJoinRoom(RoomInfo info)
         {
             PhotonNetwork.JoinRoom(info.Name);
             Events.OnShowTab(TabName.ROOM);
         }
-        
-        
     }
 }

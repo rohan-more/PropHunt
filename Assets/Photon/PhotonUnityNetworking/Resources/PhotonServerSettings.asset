@@ -48,6 +48,11 @@ MonoBehaviour:
   - RPC_SetPlayer
   - RPC_RequestDamage
   - RPC_ApplyMesh
+  - RPC_Reset
+  - RPC_SyncScore
+  - RPC_SyncHealth
+  - RPC_RequestObjectDamage
+  - RPC_RequestPlayerDamage
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

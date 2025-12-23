@@ -18,7 +18,7 @@ public class PlayerHUDPresenter : MonoBehaviourPunCallbacks
 
     private void Start()
     {
-        if (!PhotonNetwork.LocalPlayer.CustomProperties.TryGetValue("Role", out object roleObj))
+        if (!PhotonNetwork.LocalPlayer.CustomProperties.TryGetValue("PlayerType", out object roleObj))
         {
             Debug.LogWarning("[HUD] Role not set yet");
             return;
@@ -70,8 +70,7 @@ public class PlayerHUDPresenter : MonoBehaviourPunCallbacks
 
     public override void OnRoomPropertiesUpdate(Hashtable changedProps)
     {
-        if (localRole == PlayerType.HUNTER &&
-            changedProps.ContainsKey("HunterKills"))
+        if (localRole == PlayerType.HUNTER && changedProps.ContainsKey("HunterKills"))
         {
             hunterHUD.SetKillCount((int)changedProps["HunterKills"]);
         }
@@ -83,14 +82,13 @@ public class PlayerHUDPresenter : MonoBehaviourPunCallbacks
     {
         if (!target.IsLocal) return;
 
-        if (localRole == PlayerType.PROP &&
-            changedProps.ContainsKey("Health"))
+        if (localRole == PlayerType.PROP && changedProps.ContainsKey("Health"))
         {
+            Debug.Log("OnPlayerPropertiesUpdate Health: " + changedProps["Health"]);
             propHUD.SetHealth((int)changedProps["Health"]);
         }
 
-        if (localRole == PlayerType.PROP &&
-            changedProps.ContainsKey("SurvivalScore"))
+        if (localRole == PlayerType.PROP && changedProps.ContainsKey("SurvivalScore"))
         {
             propHUD.SetSurvivalScore((int)changedProps["SurvivalScore"]);
         }

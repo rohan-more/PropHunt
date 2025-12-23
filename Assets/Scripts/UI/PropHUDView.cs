@@ -9,7 +9,7 @@ public class PropHUDView : MonoBehaviour
     [SerializeField] private TMP_Text survivalScoreText;
     [SerializeField] private TMP_Text playerName;
     
-    
+
     public void SetPlayerName(string name)
     {
         playerName.text = name;

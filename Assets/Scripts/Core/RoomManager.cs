@@ -25,7 +25,7 @@ namespace Core
         private bool hasSpawned = false; // prevent duplicate spawns
         private bool sceneReady = false;
         private bool joinedRoom = false;
-
+        private bool playerTypeChosen = false;
         void Awake()
         {
             if (Instance)
@@ -51,23 +51,24 @@ namespace Core
             base.OnDisable();
             SceneManager.sceneLoaded -= OnSceneLoaded;
         }
-
+        
         void OnSceneLoaded(Scene scene, LoadSceneMode loadSceneMode)
         {
-            if (scene.buildIndex != 2) return;
+            if (scene.buildIndex != 2)
+            {
+                return;
+            }
+            
+            if (SceneManager.GetActiveScene().buildIndex != 2)
+            {
+                Debug.LogError("Player instantiated outside Gameplay");
+                return;
+            }
 
             Debug.Log("[RoomManager] OnSceneLoaded - game scene loaded");
             sceneReady = true;
             playerPositions.Clear();
             GetSpawnPositions();
-
-            // master spawns ScoreManager as before
-            if (PhotonNetwork.IsMasterClient)
-            {
-                Debug.Log("[RoomManager] MasterClient creating ScoreManager");
-                SpawnNetworkPrefab("PhotonPrefabs/ScoreManager", Vector3.one, Quaternion.identity);
-            }
-
             TrySpawnLocalControllerIfReady();
         }
 
@@ -76,11 +77,11 @@ namespace Core
             base.OnJoinedRoom();
             Debug.Log("[RoomManager] OnJoinedRoom callback received");
             joinedRoom = true;
-            TrySpawnLocalControllerIfReady();
+            //TrySpawnLocalControllerIfReady();
         }
 
 // central spawn gate
-        private void TrySpawnLocalControllerIfReady()
+        public void TrySpawnLocalControllerIfReady()
         {
             if (!sceneReady)
             {
@@ -131,7 +132,7 @@ namespace Core
             Player photonLocal = PhotonNetwork.LocalPlayer;
 
             // find this player's type in your custom list
-            PlayerType localType = PlayerType.PROP; // default fallback
+            PlayerType localType = PlayerType.HUNTER; // default fallback
             
             if (photonLocal.CustomProperties.TryGetValue(PlayerPropertyKeys.PlayerType, out object typeObj))
             {
@@ -149,10 +150,10 @@ namespace Core
             {
                 SpawnSeeker();
             }
-
+            
             hasSpawned = true;
         }
-
+        
 
         void SpawnHider()
         {
@@ -188,11 +189,15 @@ namespace Core
             SpawnNetworkPrefab("PhotonPrefabs/FP_Player_Rigged", spawnPos, Quaternion.identity);
         }
 
+        static bool IsGameplayScene()
+        {
+            return SceneManager.GetActiveScene().buildIndex == 2;
+        }
 
         GameObject SpawnNetworkPrefab(string resourcePath, Vector3 pos, Quaternion rot)
         {
             Debug.Log($"[Spawn] Attempt PhotonNetwork.Instantiate('{resourcePath}') at {pos}");
-            if (!PhotonNetwork.IsConnected || !PhotonNetwork.InRoom)
+            if (!PhotonNetwork.IsConnected || !PhotonNetwork.InRoom || !IsGameplayScene())
             {
                 Debug.LogError("[Spawn] Photon not connected or not in room. Aborting instantiate.");
                 return null;
