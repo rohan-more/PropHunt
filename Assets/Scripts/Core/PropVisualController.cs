@@ -74,9 +74,6 @@ namespace Core
             if (playerMesh == null || playerMesh.mesh == null)
                 return;
 
-            foreach (var col in GetComponents<Collider>())
-                Destroy(col);
-
             if (useMeshCollider)
             {
                 MeshCollider meshCol = gameObject.AddComponent<MeshCollider>();

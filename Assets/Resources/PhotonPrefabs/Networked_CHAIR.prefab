@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 7185612771852631852}
   - component: {fileID: 2598374493068610334}
   - component: {fileID: 8683151628599242393}
+  - component: {fileID: 3109626238670539148}
   m_Layer: 0
   m_Name: Networked_CHAIR
   m_TagString: Prop_Clone
@@ -140,10 +141,22 @@ MeshCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 5
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 4300000, guid: c7acbad2649a15647a7a4dfd8cceb5ac, type: 3}
+--- !u!114 &3109626238670539148
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1569744805326958}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 974859c195e9b1a42a7e0631ce8cef04, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
